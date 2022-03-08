@@ -54,10 +54,11 @@ music = csv.writer(f,delimiter=';')
 
 i=1    
 for obj in _temp_:
-        data = ({i,  obj.title, obj.year,  obj.star, obj.ratings} )
+        {i, obj.title, obj.year,  obj.star, obj.ratings} 
         i=i+1        
-        if(i==10):
+        if(i==300):
             break
      
-        music.writerow(data)
+       # music.writerow(data)
+        music.writerow([i,obj.title,obj.year,obj.star,obj.ratings])
 #music.writerow(_temp_) #Writing to CSV
