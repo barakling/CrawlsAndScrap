@@ -10,6 +10,7 @@ class ExtractMovies(object):
         self.name = name
         self.price = price
         self.sale = sale
+        self.department = department
             
 def first2(s):
     return s[:4]
@@ -25,6 +26,7 @@ movies = soup.select('div.product_info')
 name = soup.select('div.product-name')
 prices = soup.select('div.price')
 sales = soup.select('span.value')
+department = 'SALE Woman'
 
 _temp_ = []
 
@@ -50,11 +52,11 @@ music = csv.writer(f,delimiter=';')
 
 i=1    
 for obj in _temp_:
-        {i, obj.name, obj.price, obj.sale} 
+        {i, obj.name, obj.price, obj.sale, obj.department} 
         i=i+1        
         if(i==50):
             break
      
        # music.writerow(data)
-        music.writerow([obj.name, obj.price, obj.sale])
+        music.writerow([obj.name, obj.price, obj.sale, obj.department])
 #music.writerow(_temp_) #Writing to CSV
