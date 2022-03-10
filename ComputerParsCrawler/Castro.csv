@@ -1,24 +1,60 @@
-מכנסי טרנינג;84.95 ₪
-סריג פולו פסים אוברסייז;169.90 ₪
-סריג קרופ מסובב;0.00 ₪
-חולצת PU במראה עור עם צווארון קשירה;99.50 ₪
-חולצה מכופתרת דקה;199.00 ₪
-פוטר קולג’ אוברסייז;0.00 ₪
-פוטר בגזרה קצרה ושרוולים תפוחים;64.95 ₪
-מכנסי פוטר עם כיסים;129.90 ₪
-סריג פולו עם כפתורים;0.00 ₪
-פוטר קפוצ’ון בייסיק;89.95 ₪
-פוטר קרופ עם כיתוב;179.90 ₪
-סריג כתפיים מודגשות;0.00 ₪
-סריג פולו עם כפתורים;74.95 ₪
-מכנסי פוטר עם כיסים;149.90 ₪
-סריג וי צמות;0.00 ₪
-סוודר צמות עם פאץ’;84.95 ₪
-סריג פולו;169.90 ₪
-סריג פולו;0.00 ₪
-סריג דק עם מפתח עגול;59.90 ₪
-פוטר אוברסייז עם הדפס טקסט;99.90 ₪
-סריג ריב חיתוכים;0.00 ₪
-פוטר בהדפס עציצי פרחים;59.90 ₪
-מכנסי פוטר בגזרה גבוהה;129.90 ₪
-מכנסי פוטר במראה קרגו;0.00 ₪
+from bs4 import BeautifulSoup
+import requests
+import re
+import random
+import csv
+
+#Python class for declaring movie attribtues.
+class ExtractMovies(object):
+    def __init__(self, name, price, sale ):
+        self.name = name
+        self.price = price
+        self.sale = sale
+            
+def first2(s):
+    return s[:4]
+
+
+url = 'https://www.castro.com/sale/categories/women/'
+response = requests.get(url)
+soup = BeautifulSoup(response.text, 'html.parser')
+
+movies = soup.select('div.product_info')
+
+#name = [a.attrs.get('href') for a in soup.select('div.product-name a')]
+name = soup.select('div.product-name')
+prices = soup.select('div.price')
+sales = soup.select('span.value')
+
+_temp_ = []
+
+#loop to get and assign class instances
+for index in range(0, len(movies)):
+    name = [a.attrs.get('title') for a in soup.select('div.product-name a')]
+    #name = movies[index].get_text()
+    price = prices[index].get_text() 
+    sale = sales[index].get_text()
+    movie_instances = ExtractMovies(
+        name[index], price,sale
+        )
+    _temp_.append(movie_instances)
+
+#shuffling array to randomize movies
+#random.shuffle(_temp_)
+
+filename = 'Castro.csv'
+f = open(filename,'w',encoding='UTF8',newline='')
+
+
+music = csv.writer(f,delimiter=';')
+
+i=1    
+for obj in _temp_:
+        {i, obj.name, obj.price, obj.sale} 
+        i=i+1        
+        if(i==50):
+            break
+     
+       # music.writerow(data)
+        music.writerow([obj.name, obj.price, obj.sale])
+#music.writerow(_temp_) #Writing to CSV
