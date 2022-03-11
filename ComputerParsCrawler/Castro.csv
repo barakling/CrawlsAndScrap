@@ -34,7 +34,7 @@ _temp_ = []
 for index in range(0, len(movies)):
     name = [a.attrs.get('title') for a in soup.select('div.product-name a')]
     #name = movies[index].get_text()
-    price = prices[index].get_text() 
+    price = prices[index].get_text().replace('    מחיר מדף  0.00 ₪   ', '') 
     sale = sales[index].get_text()
     movie_instances = ExtractMovies(
         name[index], price,sale
