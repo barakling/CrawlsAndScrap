@@ -1,0 +1,121 @@
+CREATE TABLE [dbo].[Scrap_Sales_Data](
+	[name] [varchar](500) NULL,
+	[price] [varchar](500) NULL,
+	[sale_price] [varchar](500) NULL,
+	[sale] [varchar](500) NULL,
+	[department] [varchar](500) NULL,
+	[sale_price_clean] [varchar](500) NULL
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [dbo].[Scrap_Sales_sent](
+	[name] [varchar](500) NULL,
+	[sale] [varchar](500) NULL,
+	[department] [varchar](500) NULL,
+	[sale_price_clean] [varchar](500) NULL,
+	[sent_date] [smalldatetime] NULL
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Scrap_Sales_sent] ADD  DEFAULT (getdate()) FOR [sent_date]
+GO
+
+CREATE TABLE [dbo].[New_Rows](
+	[name] [varchar](500) NULL,
+	[sale] [varchar](500) NULL,
+	[department] [varchar](500) NULL,
+	[sale_price_clean] [varchar](500) NULL
+) ON [PRIMARY]
+GO
+
+-------------------------------------------------------
+
+/*Proc*/
+
+USE [BarakTest]
+
+go
+
+/****** Object:  StoredProcedure [dbo].[Sp_scrap_sales_clean]  By Barak Ling   Script Date: 11/03/2022 15:13:46 ******/
+SET ansi_nulls ON
+
+go
+
+SET quoted_identifier ON
+
+go
+
+ALTER PROCEDURE [dbo].[Sp_scrap_sales_clean]
+AS
+  BEGIN
+
+   ;WITH CTE AS(
+   SELECT name,price,sale_price, sale, department,
+       RN = ROW_NUMBER()OVER(PARTITION BY name,price,sale_price, sale, department  ORDER BY name)
+   FROM dbo.[scrap_sales_data] 
+)
+delete FROM  CTE WHERE RN > 1
+
+   ;WITH CTE AS(
+   SELECT name, sale, department, sale_price_clean, sent_date,
+       RN = ROW_NUMBER()OVER(PARTITION BY name, sale, department, sale_price_clean, sent_date  ORDER BY name)
+   FROM dbo.[Scrap_Sales_sent] 
+)
+delete FROM  CTE WHERE RN > 1
+
+      /* Clean Data */
+      UPDATE [scrap_sales_data]
+      SET    price = Replace(price, '"', ''),
+             sale_price = Replace(sale_price, '"', '')
+
+      UPDATE [scrap_sales_data]
+      SET    sale_price_clean = Replace(sale_price, ' ₪', '')
+
+	  UPDATE [scrap_sales_data]
+	  set department = sale, sale = price
+	  from [scrap_sales_data] where price   =  N'פריט שני ב- 50% הנחה'
+	 
+	  UPDATE [scrap_sales_data]
+	  set department = sale, sale = price
+	  from [scrap_sales_data] where price   =  N'2 פריטים ב-100₪'
+	 
+      /*New Rows*/
+      TRUNCATE TABLE new_rows
+
+      INSERT INTO new_rows
+                  ([name],
+                   [sale],
+                   [department],
+                   [sale_price_clean])
+      SELECT [scrap_sales_data].[name],
+             [scrap_sales_data].[sale],
+             [scrap_sales_data].[department],
+             [scrap_sales_data].[sale_price_clean]
+      FROM   [BarakTest].[dbo].[scrap_sales_data]
+             LEFT OUTER JOIN scrap_sales_sent
+                          ON scrap_sales_sent.[name] = [scrap_sales_data].[name]
+						  and  scrap_sales_sent.[sale_price_clean] = [scrap_sales_data].[sale_price_clean]
+      WHERE  Isnull(scrap_sales_sent.[name], '') = ''
+
+      /*Whats already Sent*/
+      INSERT INTO scrap_sales_sent
+                  ([name],
+                   [sale],
+                   [department],
+                   [sale_price_clean])
+      SELECT [scrap_sales_data].[name],
+             [scrap_sales_data].[sale],
+             [scrap_sales_data].[department],
+             [scrap_sales_data].[sale_price_clean]
+      FROM   [BarakTest].[dbo].[scrap_sales_data]
+             LEFT OUTER JOIN scrap_sales_sent
+                          ON scrap_sales_sent.[name] = [scrap_sales_data].NAME
+      WHERE  Isnull(Scrap_Sales_sent.NAME, '') = ''
+
+	  Return 1 
+  END
+
+go 
+
+-------------------------------------------------------
