@@ -34,12 +34,23 @@ for index in range(0, len(thescrap)):
     dict1["price"] = prices[index].get_text() 
     dict1["sale"] = sales[index].get_text()
     dict1["department"] = department
+    dict1["Index_Main"] = index
     
     _temp_.append(dict1)
     
     
-df = pd.DataFrame(_temp_)
-df.to_pickle("./test2.pkl")
+df_Fresh = pd.DataFrame(_temp_)
+unpickled_Last_Fresh = pd.read_pickle("./Fresh_Only.pkl")
+df_Fresh.to_pickle("./Fresh_Only.pkl")
+#print(df_Fresh.dtypes)
+#print(unpickled_Last_Fresh.dtypes)
 
-unpickled_df = pd.read_pickle("./test2.pkl")
-print(unpickled_df)
+# For Testing - Remove row 18 for pickle compare
+#df2 = df_Fresh[df_Fresh.Index_Main != 18]
+#df2.to_pickle("./Fresh_Only.pkl")
+
+# Merge data by NAME column
+# Only new names will be send to mail
+#m = df_Fresh.merge(unpickled_Last_Fresh, left_on='name', right_on='name', how='outer', suffixes=['', '_'], indicator=True)
+#n = m.loc[m['_merge'] == "left_only"]
+#print(n)
