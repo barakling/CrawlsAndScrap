@@ -14,7 +14,7 @@ class SaleItemsExtract(object):
 def first2(s):
     return s[:4]
 
-url = 'https://www.castro.com/sale/categories/women/'
+url = 'http://www.castro.com/sale/categories/women/'
 response = requests.get(url)
 soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -33,9 +33,13 @@ for index in range(0, len(thescrap)):
     dict1["name"] = [a.attrs.get('title') for a in soup.select('div.product-name a')]
     dict1["price"] = prices[index].get_text() 
     dict1["sale"] = sales[index].get_text()
+    dict1["department"] = department
     
     _temp_.append(dict1)
     
     
 df = pd.DataFrame(_temp_)
-print(df)
+df.to_pickle("./test2.pkl")
+
+unpickled_df = pd.read_pickle("./test2.pkl")
+print(unpickled_df)
