@@ -19,7 +19,7 @@ class SaleItemsExtract(object):
 def send_simple_message():
     return requests.post(
         "https://api.mailgun.net/v3/sandbox911cc8290c0a4a61a39ff78382bff43e.mailgun.org/messages", verify=False,
-        auth=("api", "67afd47cb4c6a417c783f0d8324d7800-62916a6c-8c3431a9"),
+       
         data={"from": "Mailgun Sandbox <postmaster@sandbox911cc8290c0a4a61a39ff78382bff43e.mailgun.org>",
             "to": "Barak Ling <ling.barak@gmail.com>",
             "subject": "Hello Barak Ling",
