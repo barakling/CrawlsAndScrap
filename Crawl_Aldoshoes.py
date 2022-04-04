@@ -73,4 +73,3 @@ elif unpickled_dict_to_file != dict2:
 unpickled_dict_to_file2 = pd.read_pickle("Aldo_Shoes_base.pkl")
 print(unpickled_dict_to_file)
 print(unpickled_dict_to_file2)"""
-
