@@ -1,4 +1,4 @@
-from unicodedata import name
+import certifi
 from bs4 import BeautifulSoup
 import requests
 from lxml import html
@@ -7,57 +7,70 @@ import pickle as pkl
 
 #Python class for declaring movie attribtues.
 class SaleItemsExtract(object):
-    def __init__(self, name, price, sale, makat ):
-        self.name = name
-        self.price = price
-        self.sale = sale
-        self.makat = makat
+    def __init__(self,  Makat, Makat_Desc, Makat_Price):
+        self.Makat = Makat
+        self.Makat_Desc = Makat_Desc
+        self.Makat_Price = Makat_Price
         #self.department = department
-            
-def first2(s):
-    return s[:4]
 
-page = requests.get('https://www.aldoshoes.co.il/cis/cis-women/footwear/sandals/high-heels-sandals/valerria-light-purple-ladies-sandals-dress-fashion-high.html')
+
+#to mail
+
+def send_simple_message():
+    return requests.post(
+        "https://api.mailgun.net/v3/sandbox911cc8290c0a4a61a39ff78382bff43e.mailgun.org/messages", verify=False,
+        auth=("api", "67afd47cb4c6a417c783f0d8324d7800-62916a6c-8c3431a9"),
+        data={"from": "Mailgun Sandbox <postmaster@sandbox911cc8290c0a4a61a39ff78382bff43e.mailgun.org>",
+            "to": "Barak Ling <ling.barak@gmail.com>",
+            "subject": "Hello Barak Ling",
+            "text": "Congratulations Barak Ling, you just sent an email with Mailgun!  You are truly awesome!"})
+#--------------------------------------------------------------------------------------------------------------------            
+
+
+page = requests.get('https://www.aldoshoes.co.il/cis/cis-women/footwear/sandals/high-heels-sandals/valerria-light-purple-ladies-sandals-dress-fashion-high.html', verify=False)
 tree = html.fromstring(page.content) 
 
 Makat = tree.xpath('//*[@id="product_addtocart_form"]/div[2]/div[1]/div[2]/div/div[2]/span/span[2]/text()')
 Makat_Desc = tree.xpath('//*[@id="product_addtocart_form"]/div[2]/div[1]/div[2]/div/div[2]/span/span[1]/text()')
 Makat_Price = tree.xpath('//*[@id="product-price-703253"]/text()')
 
-print(Makat, Makat_Desc, Makat_Price)
+Makat_Clean = [item.replace("'", "") for item in Makat]
 
+Makat_Price_Clean = [item.replace(" ", "") for item in Makat_Price]
+Makat_Price_Clean = [item.replace("\n", "") for item in Makat_Price_Clean]
+Makat_Price_Clean = [item.replace("₪", "") for item in Makat_Price_Clean]
 
-"""
-prices = soup.select('div.price')
-department = "SALE Woman"
+dict2 = {}
 
-_temp_ = []
+dict2["Makat"] = str(Makat_Clean)[1:-1]
+dict2["Makat_Desc"] = str(Makat_Desc)[1:-1]
+dict2["Makat_Price"] = str(Makat_Price_Clean)[1:-1]
 
-#loop to get and assign class instances
-for index in range(0, len(thescrap)):
-    dict1 = {}
-    dict1["name"] = [a.attrs.get('title') for a in soup.select('div.product-name a')]
-    dict1["price"] = prices[index].get_text() 
-    dict1["sale"] = sales[index].get_text()
-    dict1["department"] = department
-    dict1["Index_Main"] = index
+#print(dict2)
+#print(type(dict2))
+
+unpickled_dict_to_file = pd.read_pickle("Aldo_Shoes_base.pkl")
+#print(type(unpickled_dict_to_file2))
+
+print(dict2==unpickled_dict_to_file)
+
+if unpickled_dict_to_file == dict2:
+    print("same")
+    send_simple_message()
+elif unpickled_dict_to_file != dict2:
+    print("changed")
     
-    _temp_.append(dict1)
-    
-    
-df_Fresh = pd.DataFrame(_temp_)
-unpickled_Last_Fresh = pd.read_pickle("./Fresh_Only.pkl")
-df_Fresh.to_pickle("./Fresh_Only.pkl")
-#print(df_Fresh.dtypes)
-#print(unpickled_Last_Fresh.dtypes)
 
-# For Testing - Remove row 18 for pickle compare
-#df2 = df_Fresh[df_Fresh.Index_Main != 18]
-#df2.to_pickle("./Fresh_Only.pkl")
 
-# Merge data by NAME column
-# Only new names will be send to mail
-#m = df_Fresh.merge(unpickled_Last_Fresh, left_on='name', right_on='name', how='outer', suffixes=['', '_'], indicator=True)
-#n = m.loc[m['_merge'] == "left_only"]
-#print(n)
-"""
+#dict_to_file = open('Aldo_Shoes_1.pkl', 'wb')
+#dict_to_file2 = open('Aldo_Shoes_base.pkl', 'wb')
+#pkl.dump(dict2, dict_to_file)
+#dict_to_file.close()
+
+#print(pkl.dumps('Aldo_Shoes_1.pkl') == pkl.dumps('Aldo_Shoes_base.pkl'))
+
+"""unpickled_dict_to_file = pd.read_pickle("Aldo_Shoes_1.pkl")
+unpickled_dict_to_file2 = pd.read_pickle("Aldo_Shoes_base.pkl")
+print(unpickled_dict_to_file)
+print(unpickled_dict_to_file2)"""
+
