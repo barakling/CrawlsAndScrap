@@ -1,3 +1,4 @@
+from base64 import encode
 import certifi
 from bs4 import BeautifulSoup
 import requests
@@ -17,6 +18,43 @@ class SaleItemsExtract(object):
         self.Makat_Category = Makat_Category
         #self.department = department
 
+#declaring sendmail
+class SendMail():
+    def sendmymail(self):
+                # to mail
+        #--------------------------
+
+        mail_content = f"""
+        יש לי חדשות טובות בשבילך ♫
+
+        {dict2["מותג"],dict2["מחיר_חדש"] }  
+
+        אהבת? :) 
+
+        קישור אם בא לך להביט
+        {url}
+        """
+        #The mail addresses and password
+        sender_address = 'my.private.selector@gmail.com'
+        sender_pass = 'Ag134679'
+        receiver_address = ['ling.barak@gmail.com', 'ling.dana82@gmail.com']
+        
+        #Setup the MIME
+        message = MIMEMultipart()
+        message['From'] = sender_address
+        message['To'] = ','.join(receiver_address)
+        message['Subject'] = f'התקבל מחיר חדש ל{dict2["מחלקה"]}'   #The subject line
+        #The body and the attachments for the mail
+        message.attach(MIMEText(mail_content, 'plain'))
+        #Create SMTP session for sending the mail
+        session = smtplib.SMTP('smtp.gmail.com', 587) #use gmail with port
+        session.starttls() #enable security
+        session.login(sender_address, sender_pass) #login with mail_id and password
+        text = message.as_string()
+        session.sendmail(sender_address, receiver_address, text)
+        session.quit()
+        print('Mail Sent')
+
 #--------------------------------------------------------------------------------------------------------------------            
 
 #Itsi Bitsy
@@ -32,7 +70,7 @@ Makat_Category = tree.xpath('//*[@id="product_addtocart_form"]/div[2]/div[1]/div
 Makat_Clean = [item.replace("'", "") for item in Makat]
 Makat_Price_Clean = [item.replace(" ", "") for item in Makat_Price]
 Makat_Price_Clean = [item.replace("\n", "") for item in Makat_Price_Clean]
-Makat_Price_Clean = [item.replace("₪", "") for item in Makat_Price_Clean]
+#Makat_Price_Clean = [item.replace("₪", "") for item in Makat_Price_Clean]
 Makat_Category = [item.replace(" ", "") for item in Makat_Category]
 Makat_Category = [item.replace("\n", "") for item in Makat_Category]
 #variables to Dict
@@ -42,13 +80,16 @@ dict2["ברקוד"] = str(Makat_Clean).replace("'"," ")[1:-1]
 dict2["מותג"] = str(Makat_Desc).replace("'"," ")[1:-1]
 dict2["מחיר_חדש"] = str(Makat_Price_Clean).replace("'"," ")[1:-1]
 print(dict2)
+
+MailOperation = SendMail()
+
 #Dict to pickle dtp
 dtp = open('Aldo_Shoes_1.pkl', 'wb')
 pkl.dump(dict2, dtp)
 dtp.close()
-dtp2 = open('Aldo_Shoes_base.pkl', 'wb')
-pkl.dump(dict2, dtp2)
-dtp2.close()
+#dtp2 = open('Aldo_Shoes_base.pkl', 'wb')
+#pkl.dump(dict2, dtp2)
+#dtp2.close()
 dtp_af_pkl = pd.read_pickle("Aldo_Shoes_1.pkl")
 dtp_af_pkl2 = pd.read_pickle("Aldo_Shoes_base.pkl")
 ##print(dtp_af_pkl==dtp_af_pkl2)
@@ -58,43 +99,13 @@ dtp_af_pkl2 = pd.read_pickle("Aldo_Shoes_base.pkl")
 
 if dtp_af_pkl == dtp_af_pkl2:
     print("same")
-    send_simple_message()
-elif unpickled_dict_to_file != dict2:
+elif dtp_af_pkl != dtp_af_pkl2:
     print("changed")
+    MailOperation.sendmymail()
 
 
 ###### Distribution Class #######
 
-# to mail
-#--------------------------
-
-mail_content = f"""
-יש לי חדשות טובות בשבילך ♫
-{dict2}  
-אהבת? :) 
-
-קישור אם בא לך להביט
-{url}
-"""
-#The mail addresses and password
-sender_address = 'my.private.selector@gmail.com'
-sender_pass = 'Ag134679'
-receiver_address = 'ling.barak@gmail.com'
-#Setup the MIME
-message = MIMEMultipart()
-message['From'] = sender_address
-message['To'] = receiver_address
-message['Subject'] = f'התקבל מחיר חדש ל{dict2["מחלקה"]}'   #The subject line
-#The body and the attachments for the mail
-message.attach(MIMEText(mail_content, 'plain'))
-#Create SMTP session for sending the mail
-session = smtplib.SMTP('smtp.gmail.com', 587) #use gmail with port
-session.starttls() #enable security
-session.login(sender_address, sender_pass) #login with mail_id and password
-text = message.as_string()
-session.sendmail(sender_address, receiver_address, text)
-session.quit()
-print('Mail Sent')
 
 ###### END Distribution #######
 
